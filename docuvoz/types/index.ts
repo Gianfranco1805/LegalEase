@@ -19,12 +19,3 @@ export type Voice = {
   name: string;
   language: "es" | "en";
 };
-
-export type ApiError = {
-  error: string;
-  status: number;
-};
-
-export type ApiSuccess<T> = {
-  data: T;
-};
