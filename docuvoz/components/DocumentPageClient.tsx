@@ -1,11 +1,17 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo, useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import SpeakButton from "@/components/SpeakButton";
 import { useLanguage } from "@/lib/contexts/LanguageContext";
 import type { DocumentViewerData } from "@/types";
+
+const VOICE_OPTIONS = [
+  { id: "EXAVITQu4vr4xnSDxMaL", name: "Clara (Femenino)" },
+  { id: "pNInz6obpgDQGcFmaJgB", name: "Miguel (Masculino)" },
+  { id: "21m00Tcm4TlvDq8ikWAM", name: "Rosa (Femenino)" },
+];
 
 type DocumentPageClientProps = {
   document: DocumentViewerData;
@@ -60,6 +66,21 @@ export default function DocumentPageClient({
   const [chatInput, setChatInput] = useState("");
   const [isSendingChat, setIsSendingChat] = useState(false);
   const [chatError, setChatError] = useState<string | null>(null);
+
+  const [selectedVoiceId, setSelectedVoiceId] = useState<string>(VOICE_OPTIONS[0].id);
+
+  useEffect(() => {
+    const savedVoice = localStorage.getItem("docuvoz_voice_id");
+    if (savedVoice) {
+      setSelectedVoiceId(savedVoice);
+    }
+  }, []);
+
+  const handleVoiceChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const val = e.target.value;
+    setSelectedVoiceId(val);
+    localStorage.setItem("docuvoz_voice_id", val);
+  };
 
   async function handleTranslate() {
     try {
@@ -211,20 +232,35 @@ export default function DocumentPageClient({
               >
                 {isTranslating
                   ? t("Translating...", "Traduciendo...")
-                  : t("Create Spanish PDF", "Crear PDF en espanol")}
+                  : t("Create Spanish PDF", "Crear PDF en Español")}
               </button>
             ) : null}
 
             {translatedAudioText ? (
-              <SpeakButton
-                text={translatedAudioText}
-                defaultLabel={t("Read in Spanish", "Leer en espanol")}
-                loadingLabel={t("Generating audio...", "Generando audio...")}
-              />
+              <div className="flex items-center gap-2">
+                <select
+                  value={selectedVoiceId}
+                  onChange={handleVoiceChange}
+                  className="inline-flex h-11 items-center justify-center rounded-xl border border-zinc-700 bg-zinc-900 px-3 text-sm font-medium text-zinc-300 outline-none hover:border-zinc-500"
+                >
+                  {VOICE_OPTIONS.map((voice) => (
+                    <option key={voice.id} value={voice.id}>
+                      {voice.name}
+                    </option>
+                  ))}
+                </select>
+
+                <SpeakButton
+                  text={translatedAudioText}
+                  voiceId={selectedVoiceId}
+                  defaultLabel={t("Read in Spanish", "Leer en Español")}
+                  loadingLabel={t("Generating audio...", "Generando audio...")}
+                />
+              </div>
             ) : null}
 
             {document.canTranslate &&
-            (document.translatedPdfUrl || document.translatedText) ? (
+              (document.translatedPdfUrl || document.translatedText) ? (
               <button
                 type="button"
                 onClick={() => void handleDeleteTranslation()}
@@ -256,7 +292,7 @@ export default function DocumentPageClient({
             <p className="mt-4 max-w-2xl text-sm leading-7 text-amber-50/80">
               {t(
                 "The original file is saved. We are preparing the Spanish translation and translated PDF.",
-                "El archivo original ya esta guardado. Estamos preparando la traduccion al espanol y el PDF traducido.",
+                "El archivo original ya esta guardado. Estamos preparando la traduccion al Español y el PDF traducido.",
               )}
             </p>
           </section>
@@ -293,13 +329,13 @@ export default function DocumentPageClient({
                 <div className="flex h-full items-center justify-center px-6 text-center text-sm leading-7 text-zinc-500">
                   {document.mimeType === "application/pdf"
                     ? t(
-                        "We could not load the original PDF preview.",
-                        "No pudimos cargar la vista previa del PDF original.",
-                      )
+                      "We could not load the original PDF preview.",
+                      "No pudimos cargar la vista previa del PDF original.",
+                    )
                     : t(
-                        "This document type does not have a PDF preview yet.",
-                        "Este tipo de documento todavia no tiene vista previa en PDF.",
-                      )}
+                      "This document type does not have a PDF preview yet.",
+                      "Este tipo de documento todavia no tiene vista previa en PDF.",
+                    )}
                 </div>
               )}
             </div>
@@ -307,7 +343,7 @@ export default function DocumentPageClient({
 
           <section className="rounded-[2rem] border border-zinc-800 bg-zinc-950 px-6 py-6">
             <h2 className="text-xl font-bold text-zinc-100">
-              {t("Spanish PDF", "PDF en espanol")}
+              {t("Spanish PDF", "PDF en Español")}
             </h2>
             <div className="mt-4 h-[70vh] overflow-hidden rounded-2xl border border-zinc-800 bg-black">
               {document.translatedPdfUrl ? (
@@ -320,13 +356,13 @@ export default function DocumentPageClient({
                 <div className="flex h-full items-center justify-center px-6 text-center text-sm leading-7 text-zinc-500">
                   {document.canTranslate
                     ? t(
-                        "Your translated Spanish PDF will appear here once translation finishes.",
-                        "Tu PDF traducido al espanol aparecera aqui cuando termine la traduccion.",
-                      )
+                      "Your translated Spanish PDF will appear here once translation finishes.",
+                      "Tu PDF traducido al Español aparecera aqui cuando termine la traduccion.",
+                    )
                     : t(
-                        "This older document flow does not have a generated Spanish PDF yet.",
-                        "Este flujo anterior todavia no tiene un PDF en espanol generado.",
-                      )}
+                      "This older document flow does not have a generated Spanish PDF yet.",
+                      "Este flujo anterior todavia no tiene un PDF en Español generado.",
+                    )}
                 </div>
               )}
             </div>
@@ -349,7 +385,7 @@ export default function DocumentPageClient({
             {document.translatedText ? (
               <section className="rounded-[2rem] border border-zinc-800 bg-zinc-950 px-6 py-6">
                 <h2 className="text-xl font-bold text-zinc-100">
-                  {t("Spanish translation text", "Texto traducido al espanol")}
+                  {t("Spanish translation text", "Texto traducido al Español")}
                 </h2>
                 <div className="mt-4 whitespace-pre-wrap text-sm leading-8 text-zinc-300">
                   {document.translatedText}
@@ -376,11 +412,10 @@ export default function DocumentPageClient({
             {chatMessages.map((entry, index) => (
               <div
                 key={`${entry.role}-${index}`}
-                className={`rounded-2xl px-4 py-3 text-sm leading-7 ${
-                  entry.role === "assistant"
+                className={`rounded-2xl px-4 py-3 text-sm leading-7 ${entry.role === "assistant"
                     ? "mr-8 border border-zinc-800 bg-black/40 text-zinc-200"
                     : "ml-8 bg-emerald-500 text-black"
-                }`}
+                  }`}
               >
                 <p className="mb-1 text-[11px] font-semibold uppercase tracking-[0.2em] opacity-70">
                   {entry.role === "assistant"
