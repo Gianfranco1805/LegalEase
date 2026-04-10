@@ -18,11 +18,24 @@ export default function Header() {
 
         {/* Logo Section (Centered) */}
         <Link href="/" className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 flex items-center gap-2 group z-10">
-          <div className="w-8 h-8 rounded-xl bg-gradient-to-tr from-zinc-700 to-zinc-500 shadow-lg flex items-center justify-center text-white font-bold group-hover:scale-105 transition-transform">
-            D
+          <div className="w-8 h-8 rounded-xl bg-gradient-to-tr from-zinc-700 to-zinc-500 shadow-lg flex items-center justify-center text-white group-hover:scale-105 transition-transform">
+            <svg
+              className="h-4.5 w-4.5"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="1.8"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              aria-hidden="true"
+            >
+              <path d="M12 6.5C10.6 5.6 9 5 7.2 5H4.8A1.8 1.8 0 0 0 3 6.8v10.4A1.8 1.8 0 0 0 4.8 19h2.4c1.8 0 3.4.6 4.8 1.5" />
+              <path d="M12 6.5C13.4 5.6 15 5 16.8 5h2.4A1.8 1.8 0 0 1 21 6.8v10.4A1.8 1.8 0 0 1 19.2 19h-2.4c-1.8 0-3.4.6-4.8 1.5" />
+              <path d="M12 6.5V20.5" />
+            </svg>
           </div>
           <span className="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-zinc-100 to-zinc-400">
-            DocuVoz
+            LegalEase
           </span>
         </Link>
 
