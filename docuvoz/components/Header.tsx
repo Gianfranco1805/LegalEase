@@ -11,9 +11,13 @@ export default function Header() {
 
   return (
     <header className="sticky top-0 z-50 w-full bg-black border-b border-zinc-800 shadow-sm text-white">
-      <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
-        {/* Logo Section */}
-        <Link href="/" className="flex items-center gap-2 group">
+      <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between relative">
+        
+        {/* Empty left spacer to maintain justify-between balance if needed, though absolute positioning works better */}
+        <div className="flex-1"></div>
+
+        {/* Logo Section (Centered) */}
+        <Link href="/" className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 flex items-center gap-2 group z-10">
           <div className="w-8 h-8 rounded-xl bg-gradient-to-tr from-zinc-700 to-zinc-500 shadow-lg flex items-center justify-center text-white font-bold group-hover:scale-105 transition-transform">
             D
           </div>
@@ -23,7 +27,7 @@ export default function Header() {
         </Link>
 
         {/* Right Section */}
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-4 flex-1 justify-end">
           <button
             onClick={toggleLanguage}
             className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-zinc-800 hover:bg-zinc-700 transition-colors text-sm font-medium text-zinc-300"
