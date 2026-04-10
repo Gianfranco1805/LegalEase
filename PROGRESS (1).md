@@ -137,8 +137,8 @@ create table conversations (
 
 ### Phase 2 Tasks (10:30 AM – 2:00 PM)
 
-#### Claude Translation
-- [ ] Set up Anthropic SDK in API route (`/api/translate`)
+#### Gemini Translation
+- [ ] Set up Gemini SDK in API route (`/api/translate`)
 - [ ] Write the translation prompt:
 ```
 You are a helpful bilingual assistant. Translate the following English document 
@@ -151,7 +151,7 @@ Document:
 - [ ] Return translated text to frontend
 - [ ] Save translated text to Supabase `documents` table
 
-#### Claude Summary
+#### Gemini Summary
 - [ ] Add a `/api/summarize` route
 - [ ] Write the summary prompt:
 ```
@@ -170,9 +170,9 @@ Document:
 
 ### Phase 3 Tasks (2:00 – 5:00 PM)
 
-#### Claude Q&A
+#### Gemini Q&A
 - [ ] Set up `/api/chat` route
-- [ ] Build conversation handler — pass full document text + conversation history + new question to Claude
+- [ ] Build conversation handler — pass full document text + conversation history + new question to Gemini
 - [ ] Write the Q&A system prompt:
 ```
 You are a bilingual document assistant helping a Spanish-speaking user understand 
@@ -262,7 +262,7 @@ recognition.start();
 - [ ] Make sure voice input also works for English questions (detect or let user toggle)
 
 #### Q&A Voice Response
-- [ ] After Claude returns a Q&A answer, automatically send it to ElevenLabs and play it
+- [ ] After Gemini returns a Q&A answer, automatically send it to ElevenLabs and play it
 - [ ] Show a visual indicator that audio is playing
 - [ ] Allow user to replay the last response
 
@@ -347,7 +347,7 @@ export type Voice = {
 - [ ] Text input field + microphone button (from Dev 3) side by side
 - [ ] "Send" button — large and tap-friendly
 - [ ] Auto-scroll to latest message
-- [ ] Show typing indicator while Claude is responding
+- [ ] Show typing indicator while Gemini is responding
 
 #### Mobile Responsiveness & Accessibility
 - [ ] Test every screen on a phone screen size
