@@ -2,11 +2,12 @@
 
 import React from "react";
 import { useLanguage } from "../lib/contexts/LanguageContext";
-import { SignedIn, SignedOut, SignInButton, SignUpButton, UserButton } from "@clerk/nextjs";
+import { SignInButton, SignUpButton, UserButton, useAuth } from "@clerk/nextjs";
 import Link from "next/link";
 
 export default function Header() {
   const { language, toggleLanguage, t } = useLanguage();
+  const { isLoaded, isSignedIn } = useAuth();
 
   return (
     <header className="sticky top-0 z-50 w-full bg-black border-b border-zinc-800 shadow-sm text-white">
@@ -32,7 +33,7 @@ export default function Header() {
 
           <div className="h-6 w-[1px] bg-zinc-700"></div>
 
-          <SignedOut>
+          {isLoaded && !isSignedIn && (
             <div className="flex gap-2">
               <SignInButton mode="modal">
                 <button className="text-sm font-semibold text-zinc-300 hover:text-white px-3 py-1.5 transition-colors">
@@ -45,10 +46,11 @@ export default function Header() {
                 </button>
               </SignUpButton>
             </div>
-          </SignedOut>
-          <SignedIn>
+          )}
+          
+          {isLoaded && isSignedIn && (
             <UserButton afterSignOutUrl="/" />
-          </SignedIn>
+          )}
         </div>
       </div>
     </header>

@@ -34,14 +34,14 @@ export default function Home() {
             href="/upload"
             className="flex h-14 w-full sm:w-64 items-center justify-center gap-2 rounded-xl bg-zinc-100 px-6 text-black text-lg font-semibold hover:bg-white transition-all"
           >
-            {t("Upload Document", "Subir Documento")}
+            {t("New Document", "Nuevo Documento")}
           </Link>
           
           <Link
-            href="/upload?mode=camera"
+            href="/documents"
             className="flex h-14 w-full sm:w-64 items-center justify-center gap-2 rounded-xl bg-zinc-900 border border-zinc-800 px-6 text-zinc-300 text-lg font-semibold hover:bg-zinc-800 hover:text-white transition-all"
           >
-            {t("Take a Photo", "Tomar una Foto")}
+            {t("Translated Docs", "Docs Traducidos")}
           </Link>
         </div>
       </main>
