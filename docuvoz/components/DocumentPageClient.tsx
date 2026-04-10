@@ -1,5 +1,5 @@
 "use client";
-
+//test
 import { useMemo, useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -413,8 +413,8 @@ export default function DocumentPageClient({
               <div
                 key={`${entry.role}-${index}`}
                 className={`rounded-2xl px-4 py-3 text-sm leading-7 ${entry.role === "assistant"
-                    ? "mr-8 border border-zinc-800 bg-black/40 text-zinc-200"
-                    : "ml-8 bg-emerald-500 text-black"
+                  ? "mr-8 border border-zinc-800 bg-black/40 text-zinc-200"
+                  : "ml-8 bg-emerald-500 text-black"
                   }`}
               >
                 <p className="mb-1 text-[11px] font-semibold uppercase tracking-[0.2em] opacity-70">
@@ -423,13 +423,13 @@ export default function DocumentPageClient({
                     : t("You", "Tu")}
                 </p>
                 <div className="whitespace-pre-wrap">{entry.message}</div>
-                
+
                 {entry.role === "assistant" && (
                   <div className="mt-3 flex">
-                    <SpeakButton 
-                      text={entry.message} 
+                    <SpeakButton
+                      text={entry.message}
                       voiceId={selectedVoiceId}
-                      defaultLabel={t("Listen", "Escuchar")} 
+                      defaultLabel={t("Listen", "Escuchar")}
                       loadingLabel={t("Loading...", "Cargando...")}
                       className="inline-flex items-center justify-center rounded-lg bg-zinc-800 px-3 py-1.5 text-xs font-semibold text-zinc-300 transition hover:bg-zinc-700 hover:text-white disabled:cursor-not-allowed disabled:bg-zinc-800/50 disabled:text-zinc-500"
                     />
