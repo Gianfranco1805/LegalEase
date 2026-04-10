@@ -1,5 +1,5 @@
-# 📋 DocuVoz — Developer Progress & Task Plan
-### 305 HackShells | April 10, 2026 | 7:00 AM – 7:00 PM
+# 📋 Document Reading Assistant — Developer Progress & Task Plan
+### 305 HackShells | April 10, 2026 | 10:00 AM – 5:00 PM
 
 ---
 

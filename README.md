@@ -1,11 +1,11 @@
-# 🌊 DocuVoz — Bilingual Document Assistant
+# 🌊 Document Reading Assistant — Bilingual Document Assistant
 ### 305 HackShells | April 10, 2026 | Florida International University
 
 ---
 
 ## 🎯 Project Goal
 
-DocuVoz is a bilingual, voice-powered document assistant built for everyday Spanish-speaking users — particularly older adults and recent immigrants in the Miami community who struggle to understand English legal, financial, and administrative documents.
+Document Reading Assistant is a bilingual, voice-powered document assistant built for everyday Spanish-speaking users — particularly older adults and recent immigrants in the Miami community who struggle to understand English legal, financial, and administrative documents.
 
 The app allows users to upload or photograph any everyday document — a lease, a bill, a medical form, a school letter — and receive a full Spanish translation read aloud by a natural AI voice. Users can then ask follow-up questions about the document in Spanish or English, either by typing or speaking, and receive spoken and written responses.
 
