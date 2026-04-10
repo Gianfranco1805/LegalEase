@@ -25,7 +25,7 @@ A mobile-friendly, accessible web application that:
    - ✨ **Summarize Key Points** — AI highlights and reads the most important parts
 5. Opens a **bilingual Q&A session** where users can:
    - Type or speak their question in Spanish or English
-   - Receive a spoken + written response powered by Claude AI
+   - Receive a spoken + written response powered by Gemini AI
    - Ask as many follow-up questions as needed
 6. Saves documents to the user's account for future reference
 
@@ -96,7 +96,7 @@ We are not building a specialized legal tool. We are targeting **everyday docume
 | File Storage | Supabase Storage |
 | OCR (photo → text) | Google Cloud Vision API (GCP credits) |
 | PDF Text Extraction | PDF.js (client-side, free) |
-| AI Translation + Q&A | Claude Sonnet API ($15 LLM credits) |
+| AI Translation + Q&A | Gemini Sonnet API ($15 LLM credits) |
 | Voice Output | ElevenLabs API |
 | Voice Input | Web Speech API (built into browser, free) |
 
