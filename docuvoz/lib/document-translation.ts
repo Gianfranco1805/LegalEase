@@ -197,8 +197,6 @@ export async function translatePrivateDocumentToSpanish(documentId: number) {
     const translatedPdfBuffer = await renderSpanishPdf({
       title: `${document.title} (Spanish Translation)`,
       translatedText: generated.translatedText,
-      summary: generated.summary,
-      summaryBullets: generated.summaryBullets,
     });
 
     const { error: textUploadError } = await client.storage
@@ -269,17 +267,22 @@ export async function translatePrivateDocumentToSpanish(documentId: number) {
   } catch (error) {
     const message =
       error instanceof Error ? error.message : "Translation failed unexpectedly.";
+    const friendlyMessage = message.includes("Gemini is busy right now")
+      ? message
+      : message.includes("We could not generate the Spanish translation right now")
+        ? message
+        : "We could not finish the Spanish translation. Please try again.";
 
     await client
       .from("private_document_translations")
       .update({
         translation_status: "failed",
         summary_status: "failed",
-        last_error: message,
+        last_error: friendlyMessage,
       })
       .eq("id", translationRow.id);
 
-    throw new Error(message);
+    throw new Error(friendlyMessage);
   }
 }
 

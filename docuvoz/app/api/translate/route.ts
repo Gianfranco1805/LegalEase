@@ -1,9 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
 import { GoogleGenAI } from "@google/genai";
 
+type TranslateRequestBody = {
+  extracted_text?: string;
+};
+
 export async function POST(req: NextRequest) {
   try {
-    const { extracted_text } = await req.json();
+    const { extracted_text } = (await req.json()) as TranslateRequestBody;
 
     if (!extracted_text) {
       return NextResponse.json(
@@ -27,7 +31,10 @@ ${extracted_text}`;
     });
 
     return NextResponse.json({ translated_text: response.text });
-  } catch (error: any) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+  } catch (error: unknown) {
+    return NextResponse.json(
+      { error: error instanceof Error ? error.message : "Translation failed." },
+      { status: 500 },
+    );
   }
 }

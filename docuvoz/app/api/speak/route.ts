@@ -1,8 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
 
+type SpeakRequestBody = {
+  text?: string;
+  voiceId?: string;
+};
+
 export async function POST(req: NextRequest) {
   try {
-    const body = await req.json();
+    const body = (await req.json()) as SpeakRequestBody;
     const { text, voiceId = "EXAVITQu4vr4xnSDxMaL" } = body; 
 
     if (!text) {
@@ -49,7 +54,10 @@ export async function POST(req: NextRequest) {
         "Content-Type": "audio/mpeg",
       },
     });
-  } catch (error: any) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+  } catch (error: unknown) {
+    return NextResponse.json(
+      { error: error instanceof Error ? error.message : "Speech generation failed." },
+      { status: 500 },
+    );
   }
 }

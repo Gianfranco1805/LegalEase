@@ -1,9 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
 import { GoogleGenAI } from "@google/genai";
 
+type SummarizeRequestBody = {
+  extracted_text?: string;
+};
+
 export async function POST(req: NextRequest) {
   try {
-    const { extracted_text } = await req.json();
+    const { extracted_text } = (await req.json()) as SummarizeRequestBody;
 
     if (!extracted_text) {
       return NextResponse.json(
@@ -28,7 +32,10 @@ ${extracted_text}`;
     });
 
     return NextResponse.json({ summary_text: response.text });
-  } catch (error: any) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+  } catch (error: unknown) {
+    return NextResponse.json(
+      { error: error instanceof Error ? error.message : "Summary failed." },
+      { status: 500 },
+    );
   }
 }

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import SpeakButton from "@/components/SpeakButton";
@@ -11,6 +11,11 @@ type DocumentPageClientProps = {
   document: DocumentViewerData;
 };
 
+type ChatEntry = {
+  role: "user" | "assistant";
+  message: string;
+};
+
 export default function DocumentPageClient({
   document,
 }: DocumentPageClientProps) {
@@ -19,6 +24,42 @@ export default function DocumentPageClient({
   const [isTranslating, setIsTranslating] = useState(false);
   const [isDeletingTranslation, setIsDeletingTranslation] = useState(false);
   const [translateError, setTranslateError] = useState<string | null>(null);
+  const initialChatMessages = useMemo<ChatEntry[]>(() => {
+    if (document.summaryEs || document.summaryPoints.length > 0) {
+      const summaryParts: string[] = [];
+
+      if (document.summaryEs) {
+        summaryParts.push(document.summaryEs);
+      }
+
+      if (document.summaryPoints.length > 0) {
+        summaryParts.push(
+          document.summaryPoints.map((point) => `• ${point}`).join("\n"),
+        );
+      }
+
+      return [
+        {
+          role: "assistant",
+          message: summaryParts.join("\n\n"),
+        },
+      ];
+    }
+
+    return [
+      {
+        role: "assistant",
+        message: t(
+          "Ask me anything about this document and I will answer using the extracted text and translation when available.",
+          "Hazme cualquier pregunta sobre este documento y respondere usando el texto extraido y la traduccion cuando exista.",
+        ),
+      },
+    ];
+  }, [document.summaryEs, document.summaryPoints, t]);
+  const [chatMessages, setChatMessages] = useState<ChatEntry[]>(initialChatMessages);
+  const [chatInput, setChatInput] = useState("");
+  const [isSendingChat, setIsSendingChat] = useState(false);
+  const [chatError, setChatError] = useState<string | null>(null);
 
   async function handleTranslate() {
     try {
@@ -76,6 +117,61 @@ export default function DocumentPageClient({
     }
   }
 
+  async function handleSendChat() {
+    const message = chatInput.trim();
+
+    if (!message) {
+      return;
+    }
+
+    const previousMessages = chatMessages;
+    const nextMessages: ChatEntry[] = [
+      ...previousMessages,
+      { role: "user", message },
+    ];
+
+    try {
+      setIsSendingChat(true);
+      setChatError(null);
+      setChatMessages(nextMessages);
+      setChatInput("");
+
+      const response = await fetch(`/api/documents/${document.id}/chat`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          message,
+          conversationHistory: previousMessages,
+        }),
+      });
+
+      const payload = (await response.json()) as
+        | { data?: { text?: string }; error?: string }
+        | undefined;
+
+      if (!response.ok || !payload?.data?.text) {
+        throw new Error(payload?.error || "We could not answer that question.");
+      }
+
+      setChatMessages((current) => [
+        ...current,
+        { role: "assistant", message: payload.data?.text || "" },
+      ]);
+    } catch (error) {
+      setChatError(
+        error instanceof Error
+          ? error.message
+          : "We could not answer that question.",
+      );
+      setChatMessages(previousMessages);
+      setChatInput(message);
+    } finally {
+      setIsSendingChat(false);
+    }
+  }
+
   const showProcessingState =
     document.translationStatus === "processing" ||
     document.translationStatus === "not_started";
@@ -115,19 +211,20 @@ export default function DocumentPageClient({
               >
                 {isTranslating
                   ? t("Translating...", "Traduciendo...")
-                  : t("Create Spanish PDF", "Crear PDF en espa ol")}
+                  : t("Create Spanish PDF", "Crear PDF en espanol")}
               </button>
             ) : null}
 
             {translatedAudioText ? (
               <SpeakButton
                 text={translatedAudioText}
-                defaultLabel={t("Read in Spanish", "Leer en espa ol")}
+                defaultLabel={t("Read in Spanish", "Leer en espanol")}
                 loadingLabel={t("Generating audio...", "Generando audio...")}
               />
             ) : null}
 
-            {document.canTranslate && (document.translatedPdfUrl || document.translatedText) ? (
+            {document.canTranslate &&
+            (document.translatedPdfUrl || document.translatedText) ? (
               <button
                 type="button"
                 onClick={() => void handleDeleteTranslation()}
@@ -151,12 +248,15 @@ export default function DocumentPageClient({
         {showProcessingState ? (
           <section className="rounded-[2rem] border border-amber-500/30 bg-amber-500/10 px-8 py-10">
             <h2 className="text-2xl font-bold text-amber-100">
-              {t("Your document is still processing", "Tu documento sigue proces ndose")}
+              {t(
+                "Your document is still processing",
+                "Tu documento sigue procesandose",
+              )}
             </h2>
             <p className="mt-4 max-w-2xl text-sm leading-7 text-amber-50/80">
               {t(
                 "The original file is saved. We are preparing the Spanish translation and translated PDF.",
-                "El archivo original ya esta guardado. Estamos preparando la traduccion al espanol y el PDF traducido."
+                "El archivo original ya esta guardado. Estamos preparando la traduccion al espanol y el PDF traducido.",
               )}
             </p>
           </section>
@@ -171,7 +271,7 @@ export default function DocumentPageClient({
               {document.errorMessage ??
                 t(
                   "Please try uploading the document again.",
-                  "Vuelve a intentar subir el documento."
+                  "Vuelve a intentar subir el documento.",
                 )}
             </p>
           </section>
@@ -194,11 +294,11 @@ export default function DocumentPageClient({
                   {document.mimeType === "application/pdf"
                     ? t(
                         "We could not load the original PDF preview.",
-                        "No pudimos cargar la vista previa del PDF original."
+                        "No pudimos cargar la vista previa del PDF original.",
                       )
                     : t(
                         "This document type does not have a PDF preview yet.",
-                        "Este tipo de documento todavia no tiene vista previa en PDF."
+                        "Este tipo de documento todavia no tiene vista previa en PDF.",
                       )}
                 </div>
               )}
@@ -207,7 +307,7 @@ export default function DocumentPageClient({
 
           <section className="rounded-[2rem] border border-zinc-800 bg-zinc-950 px-6 py-6">
             <h2 className="text-xl font-bold text-zinc-100">
-              {t("Spanish PDF", "PDF en espa ol")}
+              {t("Spanish PDF", "PDF en espanol")}
             </h2>
             <div className="mt-4 h-[70vh] overflow-hidden rounded-2xl border border-zinc-800 bg-black">
               {document.translatedPdfUrl ? (
@@ -221,37 +321,17 @@ export default function DocumentPageClient({
                   {document.canTranslate
                     ? t(
                         "Your translated Spanish PDF will appear here once translation finishes.",
-                        "Tu PDF traducido al espanol aparecera aqui cuando termine la traduccion."
+                        "Tu PDF traducido al espanol aparecera aqui cuando termine la traduccion.",
                       )
                     : t(
                         "This older document flow does not have a generated Spanish PDF yet.",
-                        "Este flujo anterior todavia no tiene un PDF en espanol generado."
+                        "Este flujo anterior todavia no tiene un PDF en espanol generado.",
                       )}
                 </div>
               )}
             </div>
           </section>
         </div>
-
-        {document.summaryEs || document.summaryPoints.length > 0 ? (
-          <section className="mt-6 rounded-[2rem] border border-zinc-800 bg-zinc-950 px-6 py-6">
-            <h2 className="text-xl font-bold text-zinc-100">
-              {t("Spanish summary", "Resumen en espa ol")}
-            </h2>
-            {document.summaryEs ? (
-              <p className="mt-4 whitespace-pre-wrap text-sm leading-8 text-zinc-300">
-                {document.summaryEs}
-              </p>
-            ) : null}
-            {document.summaryPoints.length > 0 ? (
-              <ul className="mt-4 space-y-2 text-sm leading-7 text-zinc-300">
-                {document.summaryPoints.map((point) => (
-                  <li key={point}>• {point}</li>
-                ))}
-              </ul>
-            ) : null}
-          </section>
-        ) : null}
 
         {(document.originalText || document.translatedText) && (
           <div className="mt-6 grid gap-6 lg:grid-cols-2">
@@ -269,7 +349,7 @@ export default function DocumentPageClient({
             {document.translatedText ? (
               <section className="rounded-[2rem] border border-zinc-800 bg-zinc-950 px-6 py-6">
                 <h2 className="text-xl font-bold text-zinc-100">
-                  {t("Spanish translation text", "Texto traducido al espa ol")}
+                  {t("Spanish translation text", "Texto traducido al espanol")}
                 </h2>
                 <div className="mt-4 whitespace-pre-wrap text-sm leading-8 text-zinc-300">
                   {document.translatedText}
@@ -278,6 +358,75 @@ export default function DocumentPageClient({
             ) : null}
           </div>
         )}
+
+        <section className="mt-6 rounded-[2rem] border border-zinc-800 bg-zinc-950 px-6 py-6">
+          <div className="flex flex-col gap-2 border-b border-zinc-800 pb-4">
+            <h2 className="text-xl font-bold text-zinc-100">
+              {t("Ask About This Document", "Pregunta sobre este documento")}
+            </h2>
+            <p className="text-sm leading-7 text-zinc-500">
+              {t(
+                "The summary appears here first, and you can keep chatting with Gemini below.",
+                "El resumen aparece aqui primero, y luego puedes seguir chateando con Gemini abajo.",
+              )}
+            </p>
+          </div>
+
+          <div className="mt-5 max-h-[28rem] space-y-4 overflow-y-auto pr-1">
+            {chatMessages.map((entry, index) => (
+              <div
+                key={`${entry.role}-${index}`}
+                className={`rounded-2xl px-4 py-3 text-sm leading-7 ${
+                  entry.role === "assistant"
+                    ? "mr-8 border border-zinc-800 bg-black/40 text-zinc-200"
+                    : "ml-8 bg-emerald-500 text-black"
+                }`}
+              >
+                <p className="mb-1 text-[11px] font-semibold uppercase tracking-[0.2em] opacity-70">
+                  {entry.role === "assistant"
+                    ? t("Assistant", "Asistente")
+                    : t("You", "Tu")}
+                </p>
+                <div className="whitespace-pre-wrap">{entry.message}</div>
+              </div>
+            ))}
+          </div>
+
+          {chatError ? (
+            <div className="mt-4 rounded-2xl border border-rose-500/30 bg-rose-500/10 px-4 py-3 text-sm leading-7 text-rose-100">
+              {chatError}
+            </div>
+          ) : null}
+
+          <div className="mt-5 flex flex-col gap-3 sm:flex-row">
+            <textarea
+              value={chatInput}
+              onChange={(event) => setChatInput(event.target.value)}
+              onKeyDown={(event) => {
+                if (event.key === "Enter" && !event.shiftKey) {
+                  event.preventDefault();
+                  void handleSendChat();
+                }
+              }}
+              rows={3}
+              placeholder={t(
+                "Ask about deadlines, fees, obligations, or anything else in this document...",
+                "Pregunta sobre fechas limite, pagos, obligaciones o cualquier otra cosa en este documento...",
+              )}
+              className="min-h-[5.5rem] flex-1 rounded-2xl border border-zinc-800 bg-black px-4 py-3 text-sm text-white outline-none transition focus:border-emerald-500"
+            />
+            <button
+              type="button"
+              onClick={() => void handleSendChat()}
+              disabled={isSendingChat || !chatInput.trim()}
+              className="inline-flex h-12 items-center justify-center rounded-xl bg-emerald-500 px-5 text-sm font-semibold text-black transition hover:bg-emerald-400 disabled:cursor-not-allowed disabled:bg-emerald-900 disabled:text-zinc-400"
+            >
+              {isSendingChat
+                ? t("Sending...", "Enviando...")
+                : t("Send", "Enviar")}
+            </button>
+          </div>
+        </section>
       </div>
     </div>
   );

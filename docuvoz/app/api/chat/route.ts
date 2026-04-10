@@ -1,9 +1,21 @@
 import { NextRequest, NextResponse } from "next/server";
 import { GoogleGenAI } from "@google/genai";
 
+type ChatMessage = {
+  role: string;
+  message: string;
+};
+
+type ChatRequestBody = {
+  document_text?: string;
+  conversation_history?: ChatMessage[];
+  message?: string;
+};
+
 export async function POST(req: NextRequest) {
   try {
-    const { document_text, conversation_history, message } = await req.json();
+    const { document_text, conversation_history, message } =
+      (await req.json()) as ChatRequestBody;
 
     if (!message || !document_text) {
       return NextResponse.json(
@@ -20,7 +32,7 @@ Document:
 ${document_text}
 
 Conversation so far:
-${conversation_history?.map((c: any) => `${c.role}: ${c.message}`).join("\n") || "None"}
+${conversation_history?.map((c) => `${c.role}: ${c.message}`).join("\n") || "None"}
 
 User Query: ${message}`;
 
@@ -30,7 +42,10 @@ User Query: ${message}`;
     });
 
     return NextResponse.json({ text: response.text });
-  } catch (error: any) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+  } catch (error: unknown) {
+    return NextResponse.json(
+      { error: error instanceof Error ? error.message : "Chat failed." },
+      { status: 500 },
+    );
   }
 }

@@ -27,8 +27,6 @@ function wrapText(text: string, maxChars: number) {
 export async function renderSpanishPdf(params: {
   title: string;
   translatedText: string;
-  summary: string;
-  summaryBullets: string[];
 }) {
   const pdfDoc = await PDFDocument.create();
   const font = await pdfDoc.embedFont(StandardFonts.Helvetica);
@@ -55,46 +53,6 @@ export async function renderSpanishPdf(params: {
     color: rgb(0.1, 0.1, 0.1),
   });
   cursorY -= 34;
-
-  page.drawText("Resumen en espanol", {
-    x: left,
-    y: cursorY,
-    size: 13,
-    font: boldFont,
-    color: rgb(0.2, 0.2, 0.2),
-  });
-  cursorY -= 24;
-
-  for (const line of wrapText(params.summary, 82)) {
-    ensureSpace();
-    page.drawText(line, {
-      x: left,
-      y: cursorY,
-      size: 11,
-      font,
-      color: rgb(0.15, 0.15, 0.15),
-    });
-    cursorY -= lineHeight;
-  }
-
-  if (params.summaryBullets.length > 0) {
-    cursorY -= 8;
-    for (const bullet of params.summaryBullets) {
-      for (const [index, line] of wrapText(bullet, 76).entries()) {
-        ensureSpace();
-        page.drawText(index === 0 ? `- ${line}` : `  ${line}`, {
-          x: left,
-          y: cursorY,
-          size: 11,
-          font,
-          color: rgb(0.15, 0.15, 0.15),
-        });
-        cursorY -= lineHeight;
-      }
-    }
-  }
-
-  cursorY -= 18;
   ensureSpace(2);
   page.drawText("Traduccion completa", {
     x: left,
@@ -105,27 +63,42 @@ export async function renderSpanishPdf(params: {
   });
   cursorY -= 24;
 
-  for (const paragraph of params.translatedText.split(/\n+/)) {
-    const lines = wrapText(paragraph, 82);
-    if (lines.length === 0) {
+  for (const rawLine of params.translatedText.split("\n")) {
+    const line = rawLine.replace(/\t/g, "    ").trimEnd();
+
+    if (!line.trim()) {
       cursorY -= lineHeight;
       continue;
     }
 
+    const isHeading =
+      line.length < 70 &&
+      (line === line.toUpperCase() ||
+        line.endsWith(":") ||
+        /^\d+(\.\d+)*[\).\s]/.test(line));
+    const isBullet = /^[-*•]\s+/.test(line);
+    const indent = isBullet ? left + 12 : left;
+    const content = isBullet ? line.replace(/^[-*•]\s+/, "• ") : line;
+    const maxChars = isBullet ? 76 : 82;
+    const activeFont = isHeading ? boldFont : font;
+    const activeSize = isHeading ? 11.5 : 11;
+
+    const lines = wrapText(content, maxChars);
+
     for (const line of lines) {
       ensureSpace();
       page.drawText(line, {
-        x: left,
+        x: indent,
         y: cursorY,
-        size: 11,
-        font,
+        size: activeSize,
+        font: activeFont,
         color: rgb(0.15, 0.15, 0.15),
         maxWidth: right - left,
       });
       cursorY -= lineHeight;
     }
 
-    cursorY -= 6;
+    cursorY -= isHeading ? 8 : 6;
   }
 
   return Buffer.from(await pdfDoc.save());
