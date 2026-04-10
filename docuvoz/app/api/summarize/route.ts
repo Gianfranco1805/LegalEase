@@ -5,7 +5,6 @@ export async function POST(req: NextRequest) {
   try {
     const { extracted_text } = await req.json();
 
-
     if (!extracted_text) {
       return NextResponse.json(
         { error: "extracted_text is required" },
