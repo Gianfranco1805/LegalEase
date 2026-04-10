@@ -6,33 +6,20 @@ import { useState } from "react";
 import { useLanguage } from "@/lib/contexts/LanguageContext";
 import type { Document } from "@/types";
 
-const DISPLAY_FONT =
-  '"SF Pro Display", "SF Pro Icons", "Helvetica Neue", Helvetica, Arial, sans-serif';
-
 type DashboardClientProps = {
   initialDocuments: Document[];
 };
 
-function getStatusStyle(status: Document["status"]): React.CSSProperties {
+function getStatusClasses(status: Document["status"]) {
   if (status === "ready") {
-    return {
-      background: "rgba(52,199,89,0.15)",
-      color: "#34c759",
-      border: "1px solid rgba(52,199,89,0.3)",
-    };
+    return "bg-emerald-500/15 text-emerald-300 border border-emerald-500/30";
   }
+
   if (status === "error") {
-    return {
-      background: "rgba(255,59,48,0.12)",
-      color: "#ff3b30",
-      border: "1px solid rgba(255,59,48,0.3)",
-    };
+    return "bg-rose-500/15 text-rose-300 border border-rose-500/30";
   }
-  return {
-    background: "rgba(255,159,10,0.12)",
-    color: "#ff9f0a",
-    border: "1px solid rgba(255,159,10,0.3)",
-  };
+
+  return "bg-amber-500/15 text-amber-200 border border-amber-500/30";
 }
 
 export default function DashboardClient({
@@ -58,9 +45,7 @@ export default function DashboardClient({
         throw new Error(payload?.error ?? "Unable to delete document.");
       }
 
-      setDocuments((current) =>
-        current.filter((document) => document.id !== id),
-      );
+      setDocuments((current) => current.filter((document) => document.id !== id));
       router.refresh();
     } catch (error) {
       console.error(error);
@@ -73,92 +58,38 @@ export default function DashboardClient({
   }
 
   return (
-    <div
-      className="flex flex-1 items-start justify-center px-6 py-16"
-      style={{ background: "#000000", color: "#ffffff" }}
-    >
-      <div className="w-full max-w-[980px]">
-        {/* Page header */}
-        <div
-          className="mb-10 flex flex-col gap-4 pb-6 md:flex-row md:items-end md:justify-between"
-          style={{ borderBottom: "1px solid rgba(255,255,255,0.12)" }}
-        >
+    <div className="flex flex-1 items-start justify-center bg-black px-6 py-12 text-white">
+      <div className="w-full max-w-5xl">
+        <div className="mb-10 flex flex-col gap-4 border-b border-zinc-800 pb-6 md:flex-row md:items-end md:justify-between">
           <div>
-            <h1
-              className="font-semibold"
-              style={{
-                fontFamily: DISPLAY_FONT,
-                fontSize: "40px",
-                lineHeight: 1.1,
-                color: "#ffffff",
-                letterSpacing: "-0.28px",
-              }}
-            >
+            <h1 className="text-4xl font-black tracking-tight text-zinc-100">
               {t("My documents", "Mis documentos")}
             </h1>
-            <p
-              className="mt-3 max-w-2xl"
-              style={{
-                fontSize: "17px",
-                lineHeight: 1.47,
-                letterSpacing: "-0.374px",
-                color: "rgba(255,255,255,0.6)",
-              }}
-            >
+            <p className="mt-3 max-w-2xl text-sm leading-7 text-zinc-400">
               {t(
                 "Review every upload, reopen completed translations, or remove documents you no longer need.",
-                "Revisa cada carga, vuelve a abrir traducciones completas o elimina documentos que ya no necesitas.",
+                "Revisa cada carga, vuelve a abrir traducciones completas o elimina documentos que ya no necesitas."
               )}
             </p>
           </div>
 
           <Link
             href="/upload"
-            className="inline-flex items-center justify-center text-white transition-opacity hover:opacity-90 shrink-0"
-            style={{
-              fontSize: "17px",
-              letterSpacing: "-0.374px",
-              background: "#0071e3",
-              padding: "8px 20px",
-              borderRadius: "8px",
-            }}
+            className="inline-flex h-12 items-center justify-center rounded-xl bg-zinc-100 px-5 text-sm font-semibold text-black transition hover:bg-white"
           >
             {t("Upload another", "Subir otro")}
           </Link>
         </div>
 
-        {/* Empty state */}
         {documents.length === 0 ? (
-          <div
-            className="rounded-xl px-8 py-14 text-center"
-            style={{
-              background: "#272729",
-              boxShadow: "rgba(0,0,0,0.22) 3px 5px 30px 0px",
-            }}
-          >
-            <p
-              className="font-semibold"
-              style={{
-                fontFamily: DISPLAY_FONT,
-                fontSize: "21px",
-                lineHeight: 1.19,
-                color: "#ffffff",
-              }}
-            >
-              {t("No documents yet.", "Todavía no hay documentos.")}
+          <div className="rounded-[2rem] border border-zinc-800 bg-zinc-950 px-8 py-12 text-center">
+            <p className="text-lg font-semibold text-zinc-200">
+              {t("No documents yet.", "Todav a no hay documentos.")}
             </p>
-            <p
-              className="mt-3"
-              style={{
-                fontSize: "14px",
-                lineHeight: 1.43,
-                letterSpacing: "-0.224px",
-                color: "rgba(255,255,255,0.5)",
-              }}
-            >
+            <p className="mt-3 text-sm leading-7 text-zinc-500">
               {t(
                 "Upload your first PDF or photo to start building your reading history.",
-                "Sube tu primer PDF o foto para empezar tu historial de lectura.",
+                "Sube tu primer PDF o foto para empezar tu historial de lectura."
               )}
             </p>
           </div>
@@ -167,81 +98,39 @@ export default function DashboardClient({
             {documents.map((document) => (
               <article
                 key={document.id}
-                className="rounded-xl px-6 py-5"
-                style={{
-                  background: "#272729",
-                  boxShadow: "rgba(0,0,0,0.22) 3px 5px 30px 0px",
-                }}
+                className="rounded-[1.75rem] border border-zinc-800 bg-zinc-950 px-6 py-5 shadow-lg shadow-black/20"
               >
                 <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
                   <div className="min-w-0">
                     <div className="flex flex-wrap items-center gap-3">
-                      <h2
-                        className="truncate font-bold"
-                        style={{
-                          fontFamily: DISPLAY_FONT,
-                          fontSize: "21px",
-                          lineHeight: 1.19,
-                          letterSpacing: "0.231px",
-                          color: "#ffffff",
-                        }}
-                      >
+                      <h2 className="truncate text-xl font-bold text-zinc-100">
                         {document.file_name}
                       </h2>
                       <span
-                        className="rounded-full px-3 py-1 text-xs font-semibold uppercase"
-                        style={{
-                          letterSpacing: "0.2em",
-                          ...getStatusStyle(document.status),
-                        }}
+                        className={`rounded-full px-3 py-1 text-xs font-semibold uppercase tracking-[0.2em] ${getStatusClasses(
+                          document.status,
+                        )}`}
                       >
                         {document.status}
                       </span>
                     </div>
 
-                    <p
-                      className="mt-2"
-                      style={{
-                        fontSize: "12px",
-                        lineHeight: 1.33,
-                        letterSpacing: "-0.12px",
-                        color: "rgba(255,255,255,0.4)",
-                      }}
-                    >
+                    <p className="mt-3 text-sm text-zinc-500">
                       {new Date(document.created_at).toLocaleString()}
                     </p>
 
-                    <p
-                      className="mt-4 line-clamp-3 max-w-3xl"
-                      style={{
-                        fontSize: "14px",
-                        lineHeight: 1.43,
-                        letterSpacing: "-0.224px",
-                        color: "rgba(255,255,255,0.6)",
-                      }}
-                    >
+                    <p className="mt-4 line-clamp-3 max-w-3xl text-sm leading-7 text-zinc-400">
                       {document.translated_text ??
                         document.extracted_text ??
                         document.error_message ??
-                        t(
-                          "Document is still processing.",
-                          "El documento sigue procesándose.",
-                        )}
+                        t("Document is still processing.", "El documento sigue proces ndose.")}
                     </p>
                   </div>
 
-                  <div className="flex flex-wrap gap-3 shrink-0">
+                  <div className="flex flex-wrap gap-3">
                     <Link
                       href={`/document/${document.id}`}
-                      className="inline-flex items-center justify-center text-white transition-opacity hover:opacity-80"
-                      style={{
-                        fontSize: "14px",
-                        letterSpacing: "-0.224px",
-                        color: "#2997ff",
-                        padding: "7px 16px",
-                        borderRadius: "980px",
-                        border: "1px solid rgba(41,151,255,0.4)",
-                      }}
+                      className="inline-flex h-11 items-center justify-center rounded-xl border border-zinc-700 px-4 text-sm font-semibold text-zinc-200 transition hover:border-zinc-500 hover:bg-zinc-900"
                     >
                       {t("Open", "Abrir")}
                     </Link>
@@ -249,16 +138,7 @@ export default function DashboardClient({
                       type="button"
                       onClick={() => handleDelete(document.id)}
                       disabled={deletingId === document.id}
-                      className="inline-flex items-center justify-center transition-opacity hover:opacity-80 disabled:cursor-not-allowed disabled:opacity-50"
-                      style={{
-                        fontSize: "14px",
-                        letterSpacing: "-0.224px",
-                        color: "#ff453a",
-                        padding: "7px 16px",
-                        borderRadius: "980px",
-                        border: "1px solid rgba(255,69,58,0.35)",
-                        background: "rgba(255,69,58,0.1)",
-                      }}
+                      className="inline-flex h-11 items-center justify-center rounded-xl bg-rose-500/15 px-4 text-sm font-semibold text-rose-200 transition hover:bg-rose-500/25 disabled:cursor-not-allowed disabled:opacity-70"
                     >
                       {deletingId === document.id
                         ? t("Deleting...", "Eliminando...")

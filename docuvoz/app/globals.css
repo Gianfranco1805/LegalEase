@@ -1,39 +1,26 @@
 @import "tailwindcss";
 
 :root {
-  --apple-black: #000000;
-  --apple-near-black: #1d1d1f;
-  --apple-light-gray: #f5f5f7;
-  --apple-blue: #0071e3;
-  --apple-link-blue: #0066cc;
-  --apple-link-blue-dark: #2997ff;
-  --apple-dark-surface: #272729;
-  --apple-card-shadow: rgba(0, 0, 0, 0.22) 3px 5px 30px 0px;
+  --background: #ffffff;
+  --foreground: #171717;
 }
 
 @theme inline {
-  --color-apple-blue: #0071e3;
-  --color-apple-near-black: #1d1d1f;
-  --color-apple-light-gray: #f5f5f7;
-  --color-apple-dark-surface: #272729;
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background: #0a0a0a;
+    --foreground: #ededed;
+  }
 }
 
 body {
-  font-family: "SF Pro Text", "SF Pro Icons", "Helvetica Neue", Helvetica, Arial,
-    sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  background: var(--apple-black);
-  color: #ffffff;
-}
-
-/* SF Pro Display for headings (20px+) */
-h1,
-h2,
-h3,
-h4,
-h5,
-h6 {
-  font-family: "SF Pro Display", "SF Pro Icons", "Helvetica Neue", Helvetica,
-    Arial, sans-serif;
+  background: var(--background);
+  color: var(--foreground);
+  font-family: Arial, Helvetica, sans-serif;
 }

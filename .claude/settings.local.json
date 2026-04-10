@@ -1,8 +1,0 @@
-{
-  "permissions": {
-    "allow": [
-      "WebFetch(domain:getdesign.md)",
-      "Bash(npm run:*)"
-    ]
-  }
-}
