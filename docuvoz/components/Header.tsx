@@ -12,7 +12,7 @@ export default function Header() {
   return (
     <header className="sticky top-0 z-50 w-full bg-black border-b border-zinc-800 shadow-sm text-white">
       <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between relative">
-        
+
         {/* Empty left spacer to maintain justify-between balance if needed, though absolute positioning works better */}
         <div className="flex-1"></div>
 
@@ -51,8 +51,10 @@ export default function Header() {
               </SignUpButton>
             </div>
           )}
-          
-          {isLoaded && isSignedIn && <UserButton />}
+
+          {isLoaded && isSignedIn && (
+            <UserButton afterSignOutUrl="/" />
+          )}
         </div>
       </div>
     </header>
