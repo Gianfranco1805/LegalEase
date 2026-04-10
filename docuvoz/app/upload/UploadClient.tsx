@@ -3,47 +3,13 @@
 import { useEffect, useRef, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useLanguage } from "@/lib/contexts/LanguageContext";
-import type { ApiError, ApiSuccess, Document } from "@/types";
+import type { UploadDocumentResponse } from "@/types";
 
 type UploadState = {
   isSubmitting: boolean;
   error: string | null;
   statusMessage: string | null;
 };
-
-async function extractPdfText(file: File) {
-  const pdfjs = await import("pdfjs-dist/legacy/build/pdf.mjs");
-  const worker = new URL(
-    "pdfjs-dist/legacy/build/pdf.worker.min.mjs",
-    import.meta.url,
-  ).toString();
-
-  if (pdfjs.GlobalWorkerOptions.workerSrc !== worker) {
-    pdfjs.GlobalWorkerOptions.workerSrc = worker;
-  }
-
-  const pdf = await pdfjs.getDocument({
-    data: await file.arrayBuffer(),
-  }).promise;
-
-  const pages: string[] = [];
-
-  for (let pageNumber = 1; pageNumber <= pdf.numPages; pageNumber += 1) {
-    const page = await pdf.getPage(pageNumber);
-    const content = await page.getTextContent();
-    const pageText = content.items
-      .map((item) => ("str" in item ? item.str : ""))
-      .join(" ")
-      .replace(/\s+/g, " ")
-      .trim();
-
-    if (pageText) {
-      pages.push(pageText);
-    }
-  }
-
-  return pages.join("\n\n").trim();
-}
 
 export default function UploadClient() {
   const { t } = useLanguage();
@@ -76,20 +42,7 @@ export default function UploadClient() {
     });
 
     try {
-      let extractedText = "";
-
       if (file.type === "application/pdf") {
-        extractedText = await extractPdfText(file);
-
-        if (!extractedText.trim()) {
-          throw new Error(
-            t(
-              "We could not read text from that PDF. Try a clearer PDF or upload an image instead.",
-              "No pudimos leer texto de ese PDF. Intenta con un PDF mas claro o sube una imagen."
-            ),
-          );
-        }
-
         setUploadState({
           isSubmitting: true,
           error: null,
@@ -102,23 +55,21 @@ export default function UploadClient() {
 
       const formData = new FormData();
       formData.append("file", file);
+      formData.append("language", "en");
+      formData.append("translate_to_spanish", "true");
 
-      if (extractedText) {
-        formData.append("extractedText", extractedText);
-      }
-
-      const response = await fetch("/api/upload", {
+      const response = await fetch("/api/documents/upload", {
         method: "POST",
         body: formData,
       });
 
       const payload = (await response.json()) as
-        | ApiSuccess<Document>
-        | ApiError;
+        | UploadDocumentResponse
+        | { error?: string };
 
       if (!response.ok || !("data" in payload)) {
         throw new Error(
-          "error" in payload
+          ("error" in payload && payload.error)
             ? payload.error
             : t("Upload failed.", "La carga fallo."),
         );

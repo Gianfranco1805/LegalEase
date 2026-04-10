@@ -58,6 +58,24 @@ export type PrivateDocumentListItem = {
   summaryEs: string | null;
 };
 
+export type DocumentViewerData = {
+  id: string;
+  title: string;
+  fileName: string;
+  createdAt: string;
+  mimeType: string | null;
+  originalText: string | null;
+  translatedText: string | null;
+  summaryEs: string | null;
+  summaryPoints: string[];
+  translationStatus: TranslationStatus | "ready" | "unavailable";
+  errorMessage: string | null;
+  originalPdfUrl: string | null;
+  translatedPdfUrl: string | null;
+  canTranslate: boolean;
+  source: "private" | "legacy";
+};
+
 export type UploadDocumentResponse = {
   data: {
     id: number;
