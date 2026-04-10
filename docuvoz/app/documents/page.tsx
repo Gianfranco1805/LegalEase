@@ -287,5 +287,4 @@ export default function DocumentsPage() {
 
     </div>
   );
->>>>>>> 7435c11 (Update UI components: page, documents, header)
 }
