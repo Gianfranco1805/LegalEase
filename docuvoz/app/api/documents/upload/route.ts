@@ -2,6 +2,7 @@ import path from "node:path";
 
 import { apiError } from "@/lib/supabase";
 import { extractDocumentText } from "@/lib/document-extraction";
+import { translatePrivateDocumentToSpanish } from "@/lib/document-translation";
 import { createPrivateDocument } from "@/lib/private-documents";
 
 const ALLOWED_MIME_TYPES = new Set([
@@ -19,6 +20,7 @@ export async function POST(request: Request) {
     const file = formData.get("file");
     const titleValue = formData.get("title");
     const languageValue = formData.get("language");
+    const translateToSpanishValue = formData.get("translate_to_spanish");
 
     if (!(file instanceof File)) {
       return apiError("A file upload is required.", 400);
@@ -62,6 +64,14 @@ export async function POST(request: Request) {
       isFillablePdf: extraction.isFillablePdf,
     });
 
+    const shouldTranslate =
+      typeof translateToSpanishValue === "string" &&
+      translateToSpanishValue.toLowerCase() === "true";
+
+    const translation = shouldTranslate
+      ? await translatePrivateDocumentToSpanish(result.document.id)
+      : null;
+
     return Response.json({
       data: {
         id: result.document.id,
@@ -75,6 +85,10 @@ export async function POST(request: Request) {
         metadataPath: result.document.metadata_path,
         storageBucket: result.document.storage_bucket,
         metadataBucket: result.document.metadata_bucket,
+        translationStatus:
+          translation?.translation_status || (shouldTranslate ? "processing" : undefined),
+        summaryStatus:
+          translation?.summary_status || (shouldTranslate ? "processing" : undefined),
       },
     });
   } catch (error) {

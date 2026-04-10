@@ -46,4 +46,9 @@ export type PrivateDocumentListItem = {
   mime_type: string | null;
   extraction_status: string;
   created_at: string;
+  translation_status?: string;
+  summary_status?: string;
+  translated_pdf_path?: string | null;
+  translated_text_path?: string | null;
+  summary_es?: string | null;
 };

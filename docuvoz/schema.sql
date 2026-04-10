@@ -92,6 +92,36 @@ create table if not exists public.private_document_text (
   updated_at timestamptz not null default now()
 );
 
+create table if not exists public.private_document_translations (
+  id bigint generated always as identity primary key,
+  document_id bigint not null unique references public.private_documents(id) on delete cascade,
+  user_id text not null,
+  target_language text not null default 'es',
+
+  translation_status text not null default 'not_started'
+    check (translation_status in ('not_started', 'processing', 'completed', 'failed')),
+  summary_status text not null default 'not_started'
+    check (summary_status in ('not_started', 'processing', 'completed', 'failed')),
+
+  translated_text_bucket text not null default 'spanishLegalDocsTranslated',
+  translated_text_path text unique,
+  translated_pdf_bucket text not null default 'spanishLegalDocs',
+  translated_pdf_path text unique,
+  metadata_bucket text not null default 'privateDocData',
+  metadata_path text unique,
+
+  translation_model text,
+  summary_model text,
+  translated_text text,
+  summary_es text,
+  summary_points_json jsonb,
+  translated_at timestamptz,
+  last_error text,
+
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
+);
+
 create table if not exists public.scrape_runs (
   id bigint generated always as identity primary key,
   started_at timestamptz not null default now(),
@@ -112,9 +142,28 @@ create index if not exists idx_legal_documents_hash on public.legal_documents (s
 create index if not exists idx_private_documents_user_id on public.private_documents (user_id);
 create index if not exists idx_private_documents_language on public.private_documents (language);
 create index if not exists idx_private_documents_hash on public.private_documents (sha256_hash);
+create index if not exists idx_private_document_translations_document_id on public.private_document_translations (document_id);
+create index if not exists idx_private_document_translations_user_id on public.private_document_translations (user_id);
+create index if not exists idx_private_document_translations_status on public.private_document_translations (translation_status);
 
 alter table public.private_documents enable row level security;
 alter table public.private_document_text enable row level security;
+alter table public.private_document_translations enable row level security;
+
+drop policy if exists "private_documents_select_own" on public.private_documents;
+drop policy if exists "private_documents_insert_own" on public.private_documents;
+drop policy if exists "private_documents_update_own" on public.private_documents;
+drop policy if exists "private_documents_delete_own" on public.private_documents;
+
+drop policy if exists "private_document_text_select_own" on public.private_document_text;
+drop policy if exists "private_document_text_insert_own" on public.private_document_text;
+drop policy if exists "private_document_text_update_own" on public.private_document_text;
+drop policy if exists "private_document_text_delete_own" on public.private_document_text;
+
+drop policy if exists "private_document_translations_select_own" on public.private_document_translations;
+drop policy if exists "private_document_translations_insert_own" on public.private_document_translations;
+drop policy if exists "private_document_translations_update_own" on public.private_document_translations;
+drop policy if exists "private_document_translations_delete_own" on public.private_document_translations;
 
 create policy "private_documents_select_own"
 on public.private_documents
@@ -192,3 +241,24 @@ using (
       and d.user_id = auth.jwt() ->> 'sub'
   )
 );
+
+create policy "private_document_translations_select_own"
+on public.private_document_translations
+for select
+using (auth.jwt() ->> 'sub' = user_id);
+
+create policy "private_document_translations_insert_own"
+on public.private_document_translations
+for insert
+with check (auth.jwt() ->> 'sub' = user_id);
+
+create policy "private_document_translations_update_own"
+on public.private_document_translations
+for update
+using (auth.jwt() ->> 'sub' = user_id)
+with check (auth.jwt() ->> 'sub' = user_id);
+
+create policy "private_document_translations_delete_own"
+on public.private_document_translations
+for delete
+using (auth.jwt() ->> 'sub' = user_id);
